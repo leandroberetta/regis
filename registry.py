@@ -1,5 +1,5 @@
 import requests
-from response import Error, generate_error_response, generate_success_response
+import error
 
 
 class Registry:
@@ -38,9 +38,16 @@ class Registry:
         return '{0}://{1}:{2}/v2/{3}'.format(url, self.host, self.port, path)
 
     def get_images(self):
+        """
+        Returns a list of Docker images stored in a private Registry.
+
+        :return: List of images.
+        :raises: error.ConnectionError
+        """
+
         try:
             catalog = requests.get(self.get_url('_catalog'), **self.http_params).json()
 
-            return generate_success_response(catalog['repositories'])
+            return catalog['repositories']
         except requests.exceptions.ConnectionError:
-            return generate_error_response(Error.CONNECTION_ERROR)
+            raise error.ConnectionError()

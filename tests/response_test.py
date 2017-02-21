@@ -1,5 +1,6 @@
 import unittest
-from response import Error, generate_success_response, generate_error_response
+import error
+from response import generate_success_response, generate_error_response
 
 
 class TestResponse(unittest.TestCase):
@@ -10,7 +11,7 @@ class TestResponse(unittest.TestCase):
         self.assertEqual(response, {'data': ['hello-world', 'postgres']})
 
     def test_generate_connection_error_response(self):
-        response = generate_error_response(Error.CONNECTION_ERROR)
+        response = generate_error_response(error.ConnectionError())
 
         self.assertEqual(response, {'error': {'message': 'ConnectionError', 'code': 1000}})
 

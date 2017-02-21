@@ -1,5 +1,6 @@
 import unittest
 import requests
+import error
 from unittest import mock
 from registry import Registry
 
@@ -79,7 +80,7 @@ class TestRegistry(unittest.TestCase):
 
         images_reponse = registry.get_images()
 
-        self.assertEqual(images_reponse, {'data': ['hello-world', 'postgres']})
+        self.assertEqual(images_reponse, ['hello-world', 'postgres'])
         self.assertIn(mock.call(registry.get_url('_catalog'), **registry.http_params), mock_obj.call_args_list)
 
     def request_get_mock_error(*args, **kwargs):
@@ -99,9 +100,7 @@ class TestRegistry(unittest.TestCase):
     def test_get_images_with_connection_error(self, mock_obj):
         registry = Registry()
 
-        images_response = registry.get_images()
-
-        self.assertEqual(images_response, {'error': {'code': 1000, 'message': 'ConnectionError'}})
+        self.assertRaises(error.ConnectionError, registry.get_images)
         self.assertIn(mock.call(registry.get_url('_catalog'), **registry.http_params), mock_obj.call_args_list)
 
 if __name__ == '__main__':

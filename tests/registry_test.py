@@ -1,8 +1,10 @@
 import unittest
-import requests
-import error
 from unittest import mock
-from registry import Registry
+
+import requests
+
+from regis import error
+from regis.registry import Registry
 
 
 class TestRegistry(unittest.TestCase):

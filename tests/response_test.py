@@ -1,6 +1,7 @@
 import unittest
-import error
-from response import generate_success_response, generate_error_response
+
+from regis import error
+from regis.response import generate_success_response, generate_error_response
 
 
 class TestResponse(unittest.TestCase):

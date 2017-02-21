@@ -1,5 +1,6 @@
 import requests
-import error
+
+from regis import error
 
 
 class Registry:

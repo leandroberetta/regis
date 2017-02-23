@@ -1,8 +1,12 @@
 import unittest
 from unittest import mock
 
-import requests
+import sys, os
 
+print(os.path.dirname(__file__))
+sys.path.insert(0, os.path.dirname(__file__))
+
+import requests
 from regis import error
 from regis.registry import Registry
 
@@ -87,14 +91,6 @@ class TestRegistry(unittest.TestCase):
 
     def request_get_mock_error(*args, **kwargs):
 
-        class MockResponse:
-
-            def __init__(self, data):
-                self.data = data
-
-            def json(self):
-                return self.data
-
         if '_catalog' in args[0]:
             raise requests.exceptions.ConnectionError
 
@@ -104,6 +100,3 @@ class TestRegistry(unittest.TestCase):
 
         self.assertRaises(error.ConnectionError, registry.get_images)
         self.assertIn(mock.call(registry.get_url('_catalog'), **registry.http_params), mock_obj.call_args_list)
-
-if __name__ == '__main__':
-    unittest.main()

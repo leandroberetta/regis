@@ -33,14 +33,11 @@ def images():
         return jsonify(generate_error_response(exception))
 
 
-@services.route('/tags', methods=['POST', 'DELETE'])
+@services.route('/tags')
 def tags():
-    payload = request.json()
+    print(request.args['image'])
 
-    if request.method == 'POST':
-        print(payload)
-    elif request.method == 'DELETE':
-        print(payload)
+    return jsonify({})
 
 
 @services.route('/digest', methods=['POST'])

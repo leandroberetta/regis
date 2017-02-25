@@ -22,13 +22,11 @@ if config.get('security', 'ignore_ssl') is True:
 
 @services.route('/images')
 def images():
-    """ HTTP GET service that returns the list of available images.
-
-    :return: Success response or Error response in case of exception.
-    """
+    n = request.args.get('n', 10)
+    last = request.args.get('last', None)
 
     try:
-        return jsonify(generate_success_response(registry.get_images()))
+        return jsonify(generate_success_response(registry.get_images(n, last)))
     except error.ConnectionError as exception:
         return jsonify(generate_error_response(exception))
 

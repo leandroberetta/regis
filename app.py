@@ -1,5 +1,5 @@
 from flask import Flask, render_template
-from regis.services import services
+from regis.service import services
 
 app = Flask(__name__)
 

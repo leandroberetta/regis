@@ -1,5 +1,5 @@
 import requests
-
+import re
 from regis import error
 
 
@@ -38,17 +38,24 @@ class Registry:
 
         return '{0}://{1}:{2}/v2/{3}'.format(url, self.host, self.port, path)
 
-    def get_images(self):
-        """
-        Returns a list of Docker images stored in a private Registry.
-
-        :return: List of images.
-        :raises: error.ConnectionError
-        """
+    def get_images(self, n=10, last=None):
 
         try:
-            catalog = requests.get(self.get_url('_catalog'), **self.http_params).json()
+            catalog_response = requests.get(self.get_url('_catalog'),
+                                            **self.http_params,
+                                            params=self.get_pagination(n,last))
 
-            return catalog['repositories']
+            catalog_data = catalog_response.json()
+
+            link = None
+            if 'Link' in catalog_response.headers:
+                link = re.search('<(.*?)>', catalog_response.headers['Link']).group(1)
+
+            return catalog_data['repositories'], link
         except requests.exceptions.ConnectionError:
             raise error.ConnectionError()
+
+    def get_pagination(self, n, last):
+        if last is None:
+            return {'n': n}
+        return {'n': n, 'last': last}

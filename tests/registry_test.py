@@ -1,12 +1,6 @@
 import unittest
-from unittest import mock
-
-import sys, os
-
-print(os.path.dirname(__file__))
-sys.path.insert(0, os.path.dirname(__file__))
-
 import requests
+from unittest import mock
 from regis import error
 from regis.registry import Registry
 
@@ -67,20 +61,15 @@ class TestRegistry(unittest.TestCase):
 
         self.assertEqual(url, 'http://localhost:5000/v2/_catalog')
 
-    def request_get_mock_success(*args, **kwargs):
+    class MockRequestsResponse:
 
-        class MockResponse:
+        def __init__(self, data):
+            self.data = data
 
-            def __init__(self, data):
-                self.data = data
+        def json(self):
+            return self.data
 
-            def json(self):
-                return self.data
-
-        if '_catalog' in args[0]:
-            return MockResponse({'repositories': ['hello-world', 'postgres']})
-
-    @mock.patch('requests.get', side_effect=request_get_mock_success)
+    @mock.patch('requests.get', return_value=MockRequestsResponse({'repositories': ['hello-world', 'postgres']}))
     def test_get_images(self, mock_obj):
         registry = Registry()
 
@@ -89,12 +78,7 @@ class TestRegistry(unittest.TestCase):
         self.assertEqual(images_reponse, ['hello-world', 'postgres'])
         self.assertIn(mock.call(registry.get_url('_catalog'), **registry.http_params), mock_obj.call_args_list)
 
-    def request_get_mock_error(*args, **kwargs):
-
-        if '_catalog' in args[0]:
-            raise requests.exceptions.ConnectionError
-
-    @mock.patch('requests.get', side_effect=request_get_mock_error)
+    @mock.patch('requests.get', side_effect=requests.exceptions.ConnectionError)
     def test_get_images_with_connection_error(self, mock_obj):
         registry = Registry()
 

@@ -1,5 +1,4 @@
 import unittest
-
 from regis import error
 from regis.response import generate_success_response, generate_error_response
 
@@ -16,5 +15,3 @@ class TestResponse(unittest.TestCase):
 
         self.assertEqual(response, {'error': {'message': 'ConnectionError', 'code': 1000}})
 
-if __name__ == '__main__':
-    unittest.main()

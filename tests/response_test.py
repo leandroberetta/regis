@@ -3,7 +3,7 @@ from regis import error
 from regis.response import generate_success_response, generate_error_response
 
 
-class TestResponse(unittest.TestCase):
+class ResponseTest(unittest.TestCase):
 
     def test_generate_success_response(self):
         response = generate_success_response(['hello-world', 'postgres'])

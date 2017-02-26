@@ -3,6 +3,7 @@ from enum import Enum
 
 class Errors(Enum):
     CONNECTION_ERROR = (1000, "ConnectionError")
+    INTEGRITY_ERROR = (1001, "IntegrityError")
 
 
 class Error(Exception):
@@ -20,3 +21,9 @@ class ConnectionError(Error):
 
     def __init__(self):
         super().__init__(*Errors.CONNECTION_ERROR.value)
+
+
+class IntegrityError(Error):
+
+    def __init__(self):
+        super().__init__(*Errors.INTEGRITY_ERROR.value)

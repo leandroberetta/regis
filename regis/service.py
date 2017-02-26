@@ -26,7 +26,10 @@ def images():
     last = request.args.get('last', None)
 
     try:
-        return jsonify(generate_success_response(registry.get_images(n, last)))
+        images, next = registry.get_images(n, last)
+        response = {'images': images, 'next': next}
+
+        return jsonify(generate_success_response(response))
     except error.ConnectionError as exception:
         return jsonify(generate_error_response(exception))
 

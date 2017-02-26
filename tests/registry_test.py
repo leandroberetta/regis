@@ -5,7 +5,7 @@ from regis import error
 from regis.registry import Registry
 
 
-class TestRegistry(unittest.TestCase):
+class RegistryTest(unittest.TestCase):
 
     def test_create_minimal_configured_registry(self):
         registry = Registry()
@@ -63,24 +63,38 @@ class TestRegistry(unittest.TestCase):
 
     class MockRequestsResponse:
 
-        def __init__(self, data):
+        def __init__(self, data, headers):
             self.data = data
+            self.headers = headers
 
         def json(self):
             return self.data
 
-    @mock.patch('requests.get', return_value=MockRequestsResponse({'repositories': ['hello-world', 'postgres']}))
+    @mock.patch('requests.get', return_value=MockRequestsResponse({'repositories': ['hello-world', 'postgres']},
+                                                                  headers={'Link': '</v2/_catalog?n=2&last=b>; rel="next"'}))
     def test_get_images(self, mock_obj):
         registry = Registry()
 
-        images_reponse = registry.get_images()
+        images, link = registry.get_images()
 
-        self.assertEqual(images_reponse, ['hello-world', 'postgres'])
-        self.assertIn(mock.call(registry.get_url('_catalog'), **registry.http_params), mock_obj.call_args_list)
+        self.assertEqual(images, ['hello-world', 'postgres'])
+        self.assertEqual(link, '?n=2&last=b')
+        self.assertIn(mock.call(registry.get_url('_catalog'),
+                                **registry.http_params,
+                                params=registry.get_pagination(10, None)), mock_obj.call_args_list)
+
+    @mock.patch('requests.get', return_value=MockRequestsResponse({'repositories': ['hello-world', 'postgres']},
+                                                                  headers={'Link': 'link'}))
+    def test_get_images_bad_link(self, mock_obj):
+        registry = Registry()
+
+        self.assertRaises(error.IntegrityError, registry.get_images)
 
     @mock.patch('requests.get', side_effect=requests.exceptions.ConnectionError)
     def test_get_images_with_connection_error(self, mock_obj):
         registry = Registry()
 
         self.assertRaises(error.ConnectionError, registry.get_images)
-        self.assertIn(mock.call(registry.get_url('_catalog'), **registry.http_params), mock_obj.call_args_list)
+        self.assertIn(mock.call(registry.get_url('_catalog'),
+                                **registry.http_params,
+                                params=registry.get_pagination(10, None)), mock_obj.call_args_list)

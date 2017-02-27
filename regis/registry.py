@@ -68,6 +68,29 @@ class Registry:
         except AttributeError:
             raise error.IntegrityError()
 
+    def get_manifests(self, image, tag):
+        try:
+            manifests_response = requests.get(self.get_url('{0}/manifests/{1}'.format(image, tag)), **self.http_params)
+            manifests_data = self.get_data_or_throw_error(manifests_response)
+
+            digest = None
+            if 'Docker-Content-Digest' in manifests_response.headers:
+                digest = manifests_response.headers['Docker-Content-Digest']
+
+            return {'manifests': manifests_data, 'digest': digest}
+        except requests.exceptions.ConnectionError:
+            raise error.ConnectionError()
+        except AttributeError:
+            raise error.IntegrityError()
+
+    def delete_tag(self, image, digest):
+        try:
+            requests.delete(self.get_url('{0}/manifests/{1}'.format(image, digest)), **self.http_params)
+        except requests.exceptions.ConnectionError:
+            raise error.ConnectionError()
+        except AttributeError:
+            raise error.IntegrityError()
+
     @staticmethod
     def get_pagination(n, last):
         if last is None:

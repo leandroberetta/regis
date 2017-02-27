@@ -46,6 +46,14 @@ def tags():
         return jsonify(generate_error_response(exception))
 
 
-@services.route('/digest', methods=['POST'])
-def digest():
-    pass
+@services.route('/manifests', methods=['GET'])
+def manifests():
+    image = request.args.get('image', None)
+    tag = request.args.get('tag', None)
+
+    try:
+        response = registry.get_manifests(image, tag)
+
+        return jsonify(generate_success_response(response))
+    except (error.ConnectionError, error.NotFoundError) as exception:
+        return jsonify(generate_error_response(exception))

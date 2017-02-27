@@ -1,4 +1,4 @@
-{% macro tag(tag, escaped_tag, image) -%}
+{% macro tag(tag, escaped_tag, image, digest) -%}
     <div style="margin-bottom: 2px;" class="btn-group btn-group-xs" role="group">
         <button type="button" class="btn btn-info"><span class="glyphicon glyphicon-tag" aria-hidden="true"></span> {{
             tag }}
@@ -18,16 +18,13 @@
                     You're about to delete a tag. Do you want to continue?.
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
-                    <button id="{{ image }}-{{ escaped_tag }}-tag" type="button" class="btn btn-primary">Delete</button>
+                    <form action="/" method="post">
+                        <input type="hidden" name="image" value="{{ image }}">
+                        <input type="hidden" name="digest" value="{{ digest }}">
+                        <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                        <button id="{{ image }}-{{ escaped_tag }}-tag" type="submit" class="btn btn-primary">Delete</button>
+                    </form>
                 </div>
-                <script>
-                    $( "#{{ image }}-{{ escaped_tag }}-tag" ).click(function() {
-                        $.post( "/", function( data ) {
-                            $('#{{ image }}-{{ escaped_tag }}-modal').modal('toggle');
-                        });
-                    });
-                </script>
             </div>
         </div>
     </div>

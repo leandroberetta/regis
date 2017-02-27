@@ -33,27 +33,31 @@
             </div>
         </nav>
         <div class="container">
-            {% from 'tag.html' import tag as tag %}
-            <table class="table">
-                <thead>
-                    <tr>
-                        <th>Image</th>
-                        <th>Tags</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    {% for image in data['images'] %}
+            {% if 'error' in data %}
+                <div class="alert alert-danger" role="alert">{{ data['error'] }}</div>
+            {% else %}
+                {% from 'tag.html' import tag as tag %}
+                <table class="table">
+                    <thead>
                         <tr>
-                            <td>{{ image['image'] }}</td>
-                            <td>
-                                {% for tag_data in image['tags'] %}
-                                    {{ tag(tag_data['name'], tag_data['escaped_name'], image['image']) }}
-                                {% endfor %}
-                            </td>
+                            <th>Image</th>
+                            <th>Tags</th>
                         </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
+                    </thead>
+                    <tbody>
+                        {% for image in data['images'] %}
+                            <tr>
+                                <td>{{ image['image'] }}</td>
+                                <td>
+                                    {% for tag_data in image['tags'] %}
+                                        {{ tag(tag_data['name'], tag_data['escaped_name'], image['image'], tag_data['digest']) }}
+                                    {% endfor %}
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            {% endif %}
         </div>
     </body>
     </body>

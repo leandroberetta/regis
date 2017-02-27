@@ -4,7 +4,7 @@ Docker Registry (API v2) Web UI.
 
 Up to the moment the projects is a simple web UI for the Docker private registry.
 
-It Lets inspect images and tags. Also allows the logical deletion of tags.
+It lets inspect images and tags. Also allows the logical deletion of tags.
 
 ## Screenshot
 

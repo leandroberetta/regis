@@ -62,7 +62,7 @@ class Registry:
 
             tags_data = self.get_data_or_throw_error(tags_response)
 
-            return tags_data['tags']
+            return tags_data['tags'] if tags_data['tags'] else []
         except requests.exceptions.ConnectionError:
             raise error.ConnectionError()
         except AttributeError:

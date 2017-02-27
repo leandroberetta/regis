@@ -7,6 +7,8 @@ app = Flask(__name__, static_folder='regis/static', template_folder='regis/templ
 # Blueprints
 app.register_blueprint(services, url_prefix='/services')
 
+registry = Registry()
+
 
 @app.route('/', methods=['GET', 'POST'])
 def index():
@@ -17,7 +19,6 @@ def index():
 
 
 def get_data():
-    registry = Registry()
     images, link = registry.get_images()
 
     image_list = []
@@ -32,9 +33,11 @@ def get_data():
             tag_data = {'name': tag, 'escaped_name': tag.replace('.', '_')}
             tags_list.append(tag_data)
 
-        image_list.append({'image': image, 'tags': tags_list})
+        if len(tags_list) > 0:
+            image_list.append({'image': image, 'tags': tags_list})
 
     return {'registry': registry.get_url(), 'images': image_list}
+
 
 if __name__ == '__main__':
     app.run(port=4000, debug=True)

@@ -30,12 +30,14 @@ class Registry:
         self.ssl = ssl_cert_path
         self.http_params['verify'] = self.ssl
 
-    def get_url(self, path):
+    def get_url(self, path=None):
         url = 'http'
 
         if self.username is not None:
             url = 'https'
 
+        if path is None:
+            return '{0}://{1}:{2}/v2'.format(url, self.host, self.port)
         return '{0}://{1}:{2}/v2/{3}'.format(url, self.host, self.port, path)
 
     def get_images(self, n=10, last=None):

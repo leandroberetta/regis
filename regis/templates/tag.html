@@ -1,0 +1,34 @@
+{% macro tag(tag, escaped_tag, image) -%}
+    <div style="margin-bottom: 2px;" class="btn-group btn-group-xs" role="group">
+        <button type="button" class="btn btn-info"><span class="glyphicon glyphicon-tag" aria-hidden="true"></span> {{
+            tag }}
+        </button>
+        <button type="button" class="btn btn-info" data-toggle="modal" data-target="#{{ image }}-{{ escaped_tag }}-modal"><span
+                class="glyphicon glyphicon-remove" aria-hidden="true"></span></button>
+    </div>
+    <div class="modal fade" id="{{ image }}-{{ escaped_tag }}-modal" tabindex="-1" role="dialog" aria-labelledby="{{ image }}-{{ escaped_tag }}-modal">
+        <div class="modal-dialog" role="document">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <button type="button" class="close" data-dismiss="modal" aria-label="Close"><span
+                            aria-hidden="true">&times;</span></button>
+                    <h4 class="modal-title" id="myModalLabel">Delete tag</h4>
+                </div>
+                <div class="modal-body">
+                    You're about to delete a tag. Do you want to continue?.
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-default" data-dismiss="modal">Close</button>
+                    <button id="{{ image }}-{{ escaped_tag }}-tag" type="button" class="btn btn-primary">Delete</button>
+                </div>
+                <script>
+                    $( "#{{ image }}-{{ escaped_tag }}-tag" ).click(function() {
+                        $.post( "/", function( data ) {
+                            $('#{{ image }}-{{ escaped_tag }}-modal').modal('toggle');
+                        });
+                    });
+                </script>
+            </div>
+        </div>
+    </div>
+{%- endmacro %}

@@ -2,13 +2,12 @@ from flask import Flask, render_template, request, redirect, url_for
 from regis.service import services
 from regis.registry import Registry
 from regis.error import ConnectionError
+from regis.service import registry
 
 app = Flask(__name__, static_folder='regis/static', template_folder='regis/templates')
 
 # Blueprints
 app.register_blueprint(services, url_prefix='/services')
-
-registry = Registry()
 
 
 @app.route('/', methods=['GET', 'POST'])
@@ -54,4 +53,4 @@ def get_data():
 
 
 if __name__ == '__main__':
-    app.run(port=4000, debug=True)
+    app.run(host='0.0.0.0', port=4000)

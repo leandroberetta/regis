@@ -36,9 +36,14 @@ def images():
 
 @services.route('/tags')
 def tags():
-    print(request.args['image'])
+    image = request.args.get('image', None)
 
-    return jsonify({})
+    try:
+        tags = registry.get_tags(image)
+
+        return jsonify(generate_success_response(tags))
+    except (error.ConnectionError, error.NotFoundError) as exception:
+        return jsonify(generate_error_response(exception))
 
 
 @services.route('/digest', methods=['POST'])

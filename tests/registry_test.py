@@ -63,9 +63,10 @@ class RegistryTest(unittest.TestCase):
 
     class MockRequestsResponse:
 
-        def __init__(self, data, headers):
+        def __init__(self, data, headers={}, status_code=200):
             self.data = data
             self.headers = headers
+            self.status_code = status_code
 
         def json(self):
             return self.data
@@ -79,6 +80,29 @@ class RegistryTest(unittest.TestCase):
 
         self.assertEqual(images, ['hello-world', 'postgres'])
         self.assertEqual(link, '?n=2&last=b')
+        self.assertIn(mock.call(registry.get_url('_catalog'),
+                                **registry.http_params,
+                                params=registry.get_pagination(10, None)), mock_obj.call_args_list)
+
+    @mock.patch('requests.get', return_value=MockRequestsResponse({'repositories': ['hello-world', 'postgres']},
+                                                                  status_code=200))
+    def test_get_images_without_link(self, mock_obj):
+        registry = Registry()
+
+        images, link = registry.get_images()
+
+        self.assertEqual(images, ['hello-world', 'postgres'])
+        self.assertEqual(link, None)
+        self.assertIn(mock.call(registry.get_url('_catalog'),
+                                **registry.http_params,
+                                params=registry.get_pagination(10, None)), mock_obj.call_args_list)
+
+    @mock.patch('requests.get', return_value=MockRequestsResponse({}, status_code=404))
+    def test_get_inexistent_image(self, mock_obj):
+        registry = Registry()
+
+        self.assertRaises(error.NotFoundError, registry.get_images)
+
         self.assertIn(mock.call(registry.get_url('_catalog'),
                                 **registry.http_params,
                                 params=registry.get_pagination(10, None)), mock_obj.call_args_list)
@@ -98,3 +122,13 @@ class RegistryTest(unittest.TestCase):
         self.assertIn(mock.call(registry.get_url('_catalog'),
                                 **registry.http_params,
                                 params=registry.get_pagination(10, None)), mock_obj.call_args_list)
+
+    @mock.patch('requests.get', return_value=MockRequestsResponse({'tags': ['latest', '1.0.0']}))
+    def test_get_tags(self, mock_obj):
+        registry = Registry()
+
+        tags = registry.get_tags('image')
+
+        self.assertEqual(tags, ['latest', '1.0.0'])
+        self.assertIn(mock.call(registry.get_url('image/tags/list'),
+                                **registry.http_params), mock_obj.call_args_list)

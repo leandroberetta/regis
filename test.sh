@@ -1,3 +1,5 @@
 #!/usr/bin/env bash
 
-python3 -m unittest discover  -v . "*_test.py"
+coverage run --source regis -m unittest discover  -v . "*_test.py"
+coverage html
+open htmlcov/index.html

@@ -1,5 +1,5 @@
 import requests
-import re
+import json
 from regis import error
 
 
@@ -44,10 +44,23 @@ class Registry:
                                             **self.http_params,
                                             params=self.get_pagination(n,last))
 
-            catalog_data = catalog_response.json()
+            catalog_data = self.get_data_or_throw_error(catalog_response)
             link = self.get_next_link(catalog_response.headers)
 
             return catalog_data['repositories'], link
+        except requests.exceptions.ConnectionError:
+            raise error.ConnectionError()
+        except AttributeError:
+            raise error.IntegrityError()
+
+    def get_tags(self, image):
+        try:
+            tags_response = requests.get(self.get_url('{0}/tags/list'.format(image)),
+                                         **self.http_params)
+
+            tags_data = self.get_data_or_throw_error(tags_response)
+
+            return tags_data['tags']
         except requests.exceptions.ConnectionError:
             raise error.ConnectionError()
         except AttributeError:
@@ -62,5 +75,24 @@ class Registry:
     @staticmethod
     def get_next_link(headers):
         if 'Link' in headers:
-            return re.search('</v2/_catalog(.*?)>', headers['Link']).group(1)
+            try:
+                link = headers['Link']
+                parts = link.split('?')
+                parts = parts[1].split('>')
+
+                return '?' + parts[0]
+            except IndexError:
+                raise error.IntegrityError()
+            #return re.search('</v2/_catalog(.*?)>', headers['Link']).group(1)
         return None
+
+    @staticmethod
+    def get_data_or_throw_error(response):
+        if response.status_code == 404:
+            raise error.NotFoundError()
+
+        try:
+            return response.json()
+        except json.decoder.JSONDecodedError:
+            raise error.NotFoundError()
+

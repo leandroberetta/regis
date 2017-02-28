@@ -14,4 +14,3 @@ class ResponseTest(unittest.TestCase):
         response = generate_error_response(error.ConnectionError())
 
         self.assertEqual(response, {'error': {'message': 'ConnectionError', 'code': 1000}})
-

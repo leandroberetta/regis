@@ -51,7 +51,7 @@
                                 <td>{{ image['image'] }}</td>
                                 <td>
                                     {% for tag_data in image['tags'] %}
-                                        {{ tag(tag_data['name'], tag_data['escaped_name'], image['image'], tag_data['digest']) }}
+                                        {{ tag(tag_data['name'], tag_data['escaped_name'], image['image'], image['escaped_image'], tag_data['digest']) }}
                                     {% endfor %}
                                 </td>
                             </tr>

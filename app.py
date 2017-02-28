@@ -45,12 +45,15 @@ def get_data():
                 tags_list.append(tag_data)
 
             if len(tags_list) > 0:
-                image_list.append({'image': image, 'tags': tags_list})
+                image_list.append({'image': image, 'escaped_image': image.replace('/', '_'), 'tags': tags_list})
 
         return {'registry': registry.get_url(), 'images': image_list}
     except ConnectionError:
         return {'error': 'Error'}
 
+
+def escape_tag(tag):
+    tag.replace('.', '_').replace('/', '_')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=4000)

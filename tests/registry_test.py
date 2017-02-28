@@ -1,6 +1,5 @@
 import unittest
 import requests
-import json
 from unittest import mock
 from regis import error
 from regis.registry import Registry

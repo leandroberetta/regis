@@ -40,56 +40,40 @@ class Registry:
             return '{0}://{1}:{2}/v2'.format(url, self.host, self.port)
         return '{0}://{1}:{2}/v2/{3}'.format(url, self.host, self.port, path)
 
+    @error.exception_aware_context
     def get_images(self, n=10, last=None):
-        try:
-            catalog_response = requests.get(self.get_url('_catalog'),
-                                            **self.http_params,
-                                            params=self.get_pagination(n,last))
+        catalog_response = requests.get(self.get_url('_catalog'),
+                                        **self.http_params,
+                                        params=self.get_pagination(n,last))
 
-            catalog_data = self.get_data_or_throw_error(catalog_response)
-            link = self.get_next_link(catalog_response.headers)
+        catalog_data = self.get_data_or_throw_error(catalog_response)
+        link = self.get_next_link(catalog_response.headers)
 
-            return catalog_data['repositories'], link
-        except requests.exceptions.ConnectionError:
-            raise error.ConnectionError()
-        except AttributeError:
-            raise error.IntegrityError()
+        return catalog_data['repositories'], link
 
+    @error.exception_aware_context
     def get_tags(self, image):
-        try:
-            tags_response = requests.get(self.get_url('{0}/tags/list'.format(image)),
-                                         **self.http_params)
+        tags_response = requests.get(self.get_url('{0}/tags/list'.format(image)),
+                                     **self.http_params)
 
-            tags_data = self.get_data_or_throw_error(tags_response)
+        tags_data = self.get_data_or_throw_error(tags_response)
 
-            return tags_data['tags'] if tags_data['tags'] else []
-        except requests.exceptions.ConnectionError:
-            raise error.ConnectionError()
-        except AttributeError:
-            raise error.IntegrityError()
+        return tags_data['tags'] if tags_data['tags'] else []
 
+    @error.exception_aware_context
     def get_manifests(self, image, tag):
-        try:
-            manifests_response = requests.get(self.get_url('{0}/manifests/{1}'.format(image, tag)), **self.http_params)
-            manifests_data = self.get_data_or_throw_error(manifests_response)
+        manifests_response = requests.get(self.get_url('{0}/manifests/{1}'.format(image, tag)), **self.http_params)
+        manifests_data = self.get_data_or_throw_error(manifests_response)
 
-            digest = None
-            if 'Docker-Content-Digest' in manifests_response.headers:
-                digest = manifests_response.headers['Docker-Content-Digest']
+        digest = None
+        if 'Docker-Content-Digest' in manifests_response.headers:
+            digest = manifests_response.headers['Docker-Content-Digest']
 
-            return {'manifests': manifests_data, 'digest': digest}
-        except requests.exceptions.ConnectionError:
-            raise error.ConnectionError()
-        except AttributeError:
-            raise error.IntegrityError()
+        return {'manifests': manifests_data, 'digest': digest}
 
+    @error.exception_aware_context
     def delete_tag(self, image, digest):
-        try:
-            requests.delete(self.get_url('{0}/manifests/{1}'.format(image, digest)), **self.http_params)
-        except requests.exceptions.ConnectionError:
-            raise error.ConnectionError()
-        except AttributeError:
-            raise error.IntegrityError()
+        requests.delete(self.get_url('{0}/manifests/{1}'.format(image, digest)), **self.http_params)
 
     @staticmethod
     def get_pagination(n, last):
@@ -118,6 +102,6 @@ class Registry:
 
         try:
             return response.json()
-        except json.decoder.JSONDecodedError:
+        except json.decoder.JSONDecodeError:
             raise error.NotFoundError()
 

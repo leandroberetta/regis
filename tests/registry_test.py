@@ -1,5 +1,6 @@
 import unittest
 import requests
+import json
 from unittest import mock
 from regis import error
 from regis.registry import Registry
@@ -53,6 +54,13 @@ class RegistryTest(unittest.TestCase):
         url = registry.get_url('_catalog')
 
         self.assertEqual(url, 'https://localhost:5000/v2/_catalog')
+
+    def test_get_url_withouth_param(self):
+        registry = Registry()
+
+        url = registry.get_url()
+
+        self.assertEqual(url, 'http://localhost:5000/v2')
 
     def test_get_url_with_http(self):
         registry = Registry()
@@ -114,6 +122,12 @@ class RegistryTest(unittest.TestCase):
 
         self.assertRaises(error.IntegrityError, registry.get_images)
 
+    @mock.patch('requests.get', return_value=MockRequestsResponse({}))
+    def test_get_images_with_integrity_error(self, mock_obj):
+        registry = Registry()
+
+        self.assertRaises(error.IntegrityError, registry.get_images)
+
     @mock.patch('requests.get', side_effect=requests.exceptions.ConnectionError)
     def test_get_images_with_connection_error(self, mock_obj):
         registry = Registry()
@@ -131,4 +145,42 @@ class RegistryTest(unittest.TestCase):
 
         self.assertEqual(tags, ['latest', '1.0.0'])
         self.assertIn(mock.call(registry.get_url('image/tags/list'),
+                                **registry.http_params), mock_obj.call_args_list)
+
+    def test_get_pagination(self):
+        registry = Registry()
+
+        pagination = registry.get_pagination(10, None)
+
+        self.assertEqual({'n': 10}, pagination)
+
+    def test_get_pagination_with_last(self):
+        registry = Registry()
+
+        pagination = registry.get_pagination(10, 'last')
+
+        self.assertEqual({'n': 10, 'last': 'last'}, pagination)
+
+    def test_get_data_or_throw_error(self):
+        registry = Registry()
+
+        response = requests.Response()
+        self.assertRaises(error.NotFoundError, registry.get_data_or_throw_error, response)
+
+    @mock.patch('requests.get', return_value=MockRequestsResponse({}, headers={'Docker-Content-Digest': 'sha256:9e81e4ce4899448e5e7aea69a72dfd1df989a7a0fe7365ad63be1133f05acf10'}))
+    def test_get_manifests(self, mock_obj):
+        registry = Registry()
+
+        manifests_data = registry.get_manifests('image', 'tag')
+
+        self.assertEqual(manifests_data, {'manifests': {}, 'digest': 'sha256:9e81e4ce4899448e5e7aea69a72dfd1df989a7a0fe7365ad63be1133f05acf10'})
+        self.assertIn(mock.call(registry.get_url('{0}/manifests/{1}'.format('image', 'tag')),
+                                **registry.http_params), mock_obj.call_args_list)
+
+    @mock.patch('requests.delete')
+    def test_delete_tag(self, mock_obj):
+        registry = Registry()
+
+        registry.delete_tag('image', 'tag')
+        self.assertIn(mock.call(registry.get_url('{0}/manifests/{1}'.format('image', 'tag')),
                                 **registry.http_params), mock_obj.call_args_list)

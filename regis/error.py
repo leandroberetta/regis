@@ -1,4 +1,5 @@
 from enum import Enum
+import requests
 
 
 class Errors(Enum):
@@ -33,3 +34,17 @@ class NotFoundError(Error):
 
     def __init__(self):
         super().__init__(*Errors.NOT_FOUND_ERROR.value)
+
+
+def exception_aware_context(f):
+    import functools
+
+    @functools.wraps(f)
+    def wrapper(*args, **kwargs):
+        try:
+            return f(*args, **kwargs)
+        except requests.exceptions.ConnectionError:
+            raise ConnectionError()
+        except (AttributeError, KeyError):
+            raise IntegrityError()
+    return wrapper

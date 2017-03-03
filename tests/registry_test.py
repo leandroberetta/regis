@@ -156,9 +156,9 @@ class RegistryTest(unittest.TestCase):
     def test_get_pagination_with_last(self):
         registry = Registry()
 
-        pagination = registry.get_pagination(10, 'last')
+        pagination = registry.get_pagination(10, '?last=httpd&n=1')
 
-        self.assertEqual({'n': 10, 'last': 'last'}, pagination)
+        self.assertEqual({'n': 10, 'last': 'httpd'}, pagination)
 
     def test_get_data_or_throw_error(self):
         registry = Registry()
@@ -183,3 +183,9 @@ class RegistryTest(unittest.TestCase):
         registry.delete_tag('image', 'tag')
         self.assertIn(mock.call(registry.get_url('{0}/manifests/{1}'.format('image', 'tag')),
                                 **registry.http_params), mock_obj.call_args_list)
+
+    def test_get_image_name_from_link(self):
+        link = '?last=httpd&n=1'
+        image = Registry.get_image_from_link(link)
+
+        self.assertEqual('httpd', image)

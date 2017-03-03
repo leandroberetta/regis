@@ -41,10 +41,10 @@ class Registry:
         return '{0}://{1}:{2}/v2/{3}'.format(url, self.host, self.port, path)
 
     @error.exception_aware_context
-    def get_images(self, n=10, last=None):
+    def get_images(self, n=10, link=None):
         catalog_response = requests.get(self.get_url('_catalog'),
                                         **self.http_params,
-                                        params=self.get_pagination(n,last))
+                                        params=self.get_pagination(n, link))
 
         catalog_data = self.get_data_or_throw_error(catalog_response)
         link = self.get_next_link(catalog_response.headers)
@@ -76,10 +76,20 @@ class Registry:
         requests.delete(self.get_url('{0}/manifests/{1}'.format(image, digest)), **self.http_params)
 
     @staticmethod
-    def get_pagination(n, last):
-        if last is None:
+    def get_image_from_link(link):
+        try:
+            begin = link.index('=') + 1
+            end = link.index('&')
+
+            return link[begin:end]
+        except ValueError:
+            return None
+
+    @staticmethod
+    def get_pagination(n, link):
+        if link is None:
             return {'n': n}
-        return {'n': n, 'last': last}
+        return {'n': n, 'last': Registry.get_image_from_link(link)}
 
     @staticmethod
     def get_next_link(headers):
@@ -105,3 +115,12 @@ class Registry:
         except json.decoder.JSONDecodeError:
             raise error.NotFoundError()
 
+    @staticmethod
+    def get_image_from_link(link):
+        try:
+            begin = link.index('=') + 1
+            end = link.index('&')
+
+            return link[begin:end]
+        except ValueError:
+            return None

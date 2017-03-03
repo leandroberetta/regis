@@ -23,20 +23,28 @@ def index():
         return redirect(url_for('.index'))
 
 
+def get_all_images():
+    images, link = registry.get_images(n=1)
+    all_images = images
+
+    while link is not None:
+        images, link = registry.get_images(n=1, link=link)
+        all_images += images
+
+    return all_images
+
+
 def get_data():
     try:
-        images, link = registry.get_images()
+        images = get_all_images()
 
         image_list = []
-        while link is not None:
-            images, link = registry.get_images()
-
         for image in images:
             tags = registry.get_tags(image)
 
             tags_list = []
             for tag in tags:
-                tag_data = {'name': tag, 'escaped_name': tag.replace('.', '_')}
+                tag_data = {'name': tag, 'escaped_name': escape_tag(tag)}
 
                 manifests_data = registry.get_manifests(image, tag)
                 if 'digest' in manifests_data:
@@ -53,7 +61,7 @@ def get_data():
 
 
 def escape_tag(tag):
-    tag.replace('.', '_').replace('/', '_')
+    return tag.replace('.', '_').replace('/', '_')
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=4000)  # pragma: no cover

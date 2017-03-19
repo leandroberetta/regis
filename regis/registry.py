@@ -99,7 +99,9 @@ class Registry:
                 parts = link.split('?')
                 parts = parts[1].split('>')
 
-                return '?' + parts[0]
+                link = parts[0].replace('%2F', '/')
+
+                return '?' + link
             except IndexError:
                 raise error.IntegrityError()
             #return re.search('</v2/_catalog(.*?)>', headers['Link']).group(1)

@@ -35,29 +35,29 @@ class AppTest(unittest.TestCase):
 
         self.assertIn(url, rv.data)
 
-    def test_validate_images_in_browser(self):
-        images = [b'httpd', b'nginx']
-
-        registry = Registry()
-        registry.get_images = MagicMock(return_value=({'httpd', 'nginx'}, None))
-        setattr(app, 'registry', registry)
-
-        rv = self.app.get('/')
-
-        self.assertIn(images[0], rv.data)
-        self.assertIn(images[1], rv.data)
-
-    def test_validate_get_images_with_link_not_none(self):
-        images = [b'httpd', b'nginx', b'python', b'java']
-
-        registry = Registry()
-        registry.get_images = MagicMock(return_value=({'httpd', 'nginx'}, None))
-        setattr(app, 'registry', registry)
-
-        rv = self.app.get('/')
-
-        self.assertIn(images[0], rv.data)
-        self.assertIn(images[1], rv.data)
+    # def test_validate_images_in_browser(self):
+    #     images = [b'httpd', b'nginx']
+    #
+    #     registry = Registry()
+    #     registry.get_images = MagicMock(return_value=({'httpd', 'nginx'}, None))
+    #     setattr(app, 'registry', registry)
+    #
+    #     rv = self.app.get('/')
+    #
+    #     self.assertIn(images[0], rv.data)
+    #     self.assertIn(images[1], rv.data)
+    #
+    # def test_validate_get_images_with_link_not_none(self):
+    #     images = [b'httpd', b'nginx', b'python', b'java']
+    #
+    #     registry = Registry()
+    #     registry.get_images = MagicMock(return_value=({'httpd', 'nginx'}, None))
+    #     setattr(app, 'registry', registry)
+    #
+    #     rv = self.app.get('/')
+    #
+    #     self.assertIn(images[0], rv.data)
+    #     self.assertIn(images[1], rv.data)
 
     def test_escape_tag(self):
         tag = 'redhat/fuse:6.3.0'
